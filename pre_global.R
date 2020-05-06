@@ -11,35 +11,34 @@ count_tar <- function(PU = NULL, target = NULL){
   round(cellStats(PU,"sum") / 100 * target, 0)
 }
 
-ELSA_df <- read_xlsx(here("ELSA UGA_Global Comparison Table.xlsx"), "data_links")
+ELSA_df <- read_xlsx(here("Costa Rica v2 Data.xlsx"), "Sheet1")
 
 
 feat_df <- ELSA_df[!is.na(ELSA_df$Protect), ] %>% 
-  mutate(feat_name = ifelse(!is.na(UGA_data), UGA_data, Global_data)) %>% 
+  mutate(feat_name = ifelse(!is.na(CR_data), CR_data, Global_data)) %>% 
   arrange(`Label-theme`, `Label-name`)
 
-feat_stack <- stack(here("data/features/", feat_df$feat_name))
+feat_stack <- stack(here("data/Features/", feat_df$feat_name))
 feat_stack_sc <- feat_stack / cellStats(feat_stack, max)
                                                          
 
 #Possible cost layer:
-HFP <- raster(here("data/zones/", ELSA_df[ELSA_df$`Main Category` == "Cost","Global_data"]))
+HFP <- raster(here("data/zones/", ELSA_df[ELSA_df$`Main Category` == "Human Footprint","CR_data"]))
 
 #Protected areas
-PA <- raster(here("data/zones/", ELSA_df[ELSA_df$`Sub Category` == "Protected Areas", "Global_data"][1,]))
-PA <- PA > 0.5
+PA <- raster(here("data/zones/", ELSA_df[ELSA_df$`Main Category` == "Protected Natural Areas", "CR_data"][1,]))
+PA <- PA > 50
 PA0 <- PA
 PA0[] <- NA
-# forest_reserv<-raster("Forest Reserve.tif")
 # T_indigena<- raster("Indigenous Territories.tif")
 
 
 # pu
-pu0 <- raster(here("data/", ELSA_df[ELSA_df$`Main Category` == "Planning Units","UGA_data"]))
+pu0 <- raster(here("data/", ELSA_df[ELSA_df$`Main Category` == "Planning units","CR_data"]))
 pu <- pu0
 pu[is.na(HFP)] <- NA
 
-HFP_zones <- raster(here("data/zones/", "hfp_uga.tif"))
+# HFP_zones <- raster(here("data/zones/", "hfp_uga.tif"))
 
 # HFP < 14 ~ 50% of country
 HFP_pro <- HFP < 12
