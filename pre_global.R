@@ -100,28 +100,27 @@ pu1_pe <- stack(Z_PR_PE, Z_RE_PE, Z_MG_PE, Z_UG_PE)
 names(pu1) <- names(pu1_pr) <- 
   names(pu1_es) <- names(pu1_pe) <- c("Protect", "Restore", "Manage", "Urban_Green")
 
-HFP_p <- HFP_r <- HFP_m <- HFP_b <- HFP
-HFP_p[] <- ifelse(HFP_pro[], HFP_p[], NA)
-HFP_r[] <- ifelse(HFP_res[], HFP_r[], NA)
-HFP_m[] <- ifelse(HFP_mg[], HFP_m[], NA)
-# HFP_b[] <- ifelse(HFP_BAU[], HFP_b[], NA)
 
-HFP_p_pa <- HFP_r_pa <- HFP_m_pa <- HFP_b_pa <- HFP
-HFP_p_pa[] <- ifelse(HFP_pro_PA[], HFP_p_pa[], NA)
-HFP_r_pa[] <- ifelse(HFP_res_PA[], HFP_r_pa[], NA)
-HFP_m_pa[] <- ifelse(HFP_mg_PA[], HFP_m_pa[], NA)
-# HFP_b[] <- ifelse(HFP_BAU[], HFP_b[], NA)
+#HFP as cost
+HFP_pu1 <- pu1 * HFP
+HFP_pu1_pr <- pu1_pr * HFP
+HFP_pu1_es <- pu1_es * HFP
+HFP_pu1_pe <- pu1_pe * HFP
 
-# pu_hf <- stack(HFP_p, HFP_r, HFP_m, HFP_b)
-# names(pu_hf) <- c("Protect", "Restore", "Manage", "BAU")
-pu_hf <- stack(HFP_p, HFP_r, HFP_m)
-pu_hf_pa <- stack(HFP_p_pa, HFP_r_pa, HFP_m_pa)
-names(pu_hf) <- names(pu_hf_pa) <- c("Protect", "Restore", "Manage")
+names(HFP_pu1) <- names(HFP_pu1_pr) <- 
+  names(HFP_pu1_es) <- names(HFP_pu1_pe) <- c("Protect", "Restore", "Manage", "Urban_Green")
 
-pu_all <- list(area = list(locked = pu1_pa,
-                           avail = pu1),
-               human = list(locked = pu_hf_pa,
-                            avail = pu_hf)
+
+#combine zone/cost layer
+pu_all <- list(area = list(avail = pu1,
+                           pa = pu1_pr,
+                           es = pu1_es,
+                           pe = pu1_pe),
+               
+               human = list(avail = HFP_pu1,
+                            pa = HFP_pu1_pr,
+                            es = HFP_pu1_es,
+                            pe = HFP_pu1_pe)
                )
 
 

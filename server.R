@@ -127,27 +127,25 @@ shinyServer(function(input, output, session) {
       zn1 <- feat_stack * impacts.temp[,"Protect"]
       zn2 <- feat_stack * impacts.temp[,"Restore"] 
       zn3 <- feat_stack * impacts.temp[,"Manage"] 
-      # zn4 <- feat_stack * impacts.temp[,"BAU"] 
+      zn4 <- feat_stack * impacts.temp[,"Urban_Green"] 
       
       ### Create Zone file
-      zns <- zones("Protect" = zn1, "Restore" = zn2,  "Manage" = zn3, #"BAU" = zn4,
+      zns <- zones("Protect" = zn1, "Restore" = zn2,  "Manage" = zn3, "Urban_Green" = zn4,
                    feature_names = names(zn1))
       
       # expand to different costs in the future
       pu_temp <- pu_all[[input$cost]][[input$protected]]
         
-      
-      zone_4_target <- 100 - input$zone_1_target - input$zone_2_target - input$zone_3_target
-      
       prob.ta <- problem(pu_temp, zns) %>%
         add_max_utility_objective(c(count_tar(pu0, input$zone_1_target), 
                                     count_tar(pu0,input$zone_2_target), 
-                                    count_tar(pu0,input$zone_3_target))) %>%
+                                    count_tar(pu0,input$zone_3_target),
+                                    count_tar(pu0,input$zone_4_target))) %>%
         
                                     # count_tar(pu0,zone_4_target))) %>%
         add_gurobi_solver(gap = 0) 
       
-
+#TODO
       if(input$protected == "locked"){
         prob.ta <- prob.ta %>%
           add_locked_in_constraints(stack(PA, PA0, PA0))
@@ -159,12 +157,12 @@ shinyServer(function(input, output, session) {
       
       #all groups
       prob.all <- prob.ta %>%
-        add_feature_weights(as.matrix(matrix(rep(weights.temp$weight, 3), ncol = 3, nrow = nlayers(feat_stack))))
+        add_feature_weights(as.matrix(matrix(rep(weights.temp$weight, 4), ncol = 4, nrow = nlayers(feat_stack))))
       result <- prioritizr::solve(prob.all, force = TRUE)
       
       feat_rep <- feature_representation(prob.all, result)
       
-      tmp <- impacts.temp[, c("feature", "Protect", "Restore", "Manage")] %>% 
+      tmp <- impacts.temp[, c("feature", "Protect", "Restore", "Manage", "Urban_Green")] %>% 
         pivot_longer(-feature, names_to = "zone", values_to = "impact")
       
       feat_rep <- left_join(feat_rep, tmp, by = c('feature' = 'feature', 'zone' = 'zone'))
@@ -177,7 +175,7 @@ shinyServer(function(input, output, session) {
       wt.CBD <- weights.temp
       wt.CBD$weight[names(feat_stack) %notin% CBD_names] <- 0
       prob.CBD <- prob.ta %>%
-        add_feature_weights(as.matrix(matrix(rep(wt.CBD$weight, 3), ncol = 3, nrow = nlayers(feat_stack))))
+        add_feature_weights(as.matrix(matrix(rep(wt.CBD$weight, 4), ncol = 4, nrow = nlayers(feat_stack))))
       res.CBD <- prioritizr::solve(prob.CBD, force = TRUE)
       
       feat_rep_CBD <- feature_representation(prob.CBD, res.CBD)
@@ -190,7 +188,7 @@ shinyServer(function(input, output, session) {
       wt.UNFCCC <- weights.temp
       wt.UNFCCC$weight[names(feat_stack) %notin% UNFCCC_names] <- 0
       prob.UNFCCC <- prob.ta %>%
-        add_feature_weights(as.matrix(matrix(rep(wt.UNFCCC$weight, 3), ncol = 3, nrow = nlayers(feat_stack))))
+        add_feature_weights(as.matrix(matrix(rep(wt.UNFCCC$weight, 4), ncol = 4, nrow = nlayers(feat_stack))))
       res.UNFCCC <- prioritizr::solve(prob.UNFCCC, force = TRUE)
       
       feat_rep_UNFCCC <- feature_representation(prob.UNFCCC, res.UNFCCC)
@@ -203,7 +201,7 @@ shinyServer(function(input, output, session) {
       wt.SDG <- weights.temp
       wt.SDG$weight[names(feat_stack) %notin% SDG_names] <- 0
       prob.SDG <- prob.ta %>%
-        add_feature_weights(as.matrix(matrix(rep(wt.SDG$weight, 3), ncol = 3, nrow = nlayers(feat_stack))))
+        add_feature_weights(as.matrix(matrix(rep(wt.SDG$weight, 4), ncol = 4, nrow = nlayers(feat_stack))))
       res.SDG <- prioritizr::solve(prob.SDG, force = TRUE)
       
       feat_rep_SDG <- feature_representation(prob.SDG, res.SDG)
@@ -351,7 +349,8 @@ shinyServer(function(input, output, session) {
       
       names(rst) <- c("Protect",
                       "Restore",
-                      "Manage")#,
+                      "Manage",
+                      "Urban_Green")#,
       # "BAU")
       
       rst[rst == 0] <- NA
@@ -481,8 +480,8 @@ shinyServer(function(input, output, session) {
       
       names(rst) <- names(rst.CBD) <-  names(rst.UNFCCC) <- names(rst.SDG) <- c("Protect",
                                                                                 "Restore",
-                                                                                "Manage")#,
-                                                                                #"BAU")
+                                                                                "Manage",
+                                                                                "Urban_Green")
       
       rst[rst == 0] <- NA
       rst.CBD[rst.CBD == 0] <- NA

@@ -28,14 +28,16 @@ body <- dashboardBody(tags$head(tags$style(HTML('
                          c("Area" = "area"
                            ,"Human Footprint" = "human"
                            )),
-             selectInput("protected", "How to deal with protected areas:",
-                         c("Locked in" = "locked",
-                           "Available" = "avail")),
+             
+             tags$b("Do you want to lock in the following features?"),
+             checkboxInput("protect", "Protected Areas", FALSE),
+             checkboxInput("pes", "Payment for Ecosystem Services", FALSE),
              tags$hr(),
              helpText(HTML("Given the current problem formulations values need to be set >= 0.001.")),
              numericInput("zone_1_target", "Protect target", 20, min = 0, max = 100, step = 1),
              numericInput("zone_2_target", "Restore target", 0.001, min = 0, max = 100, step = 1),
-             numericInput("zone_3_target", "Manage target", 0.001, min = 0, max = 100, step = 1)
+             numericInput("zone_3_target", "Manage target", 0.001, min = 0, max = 100, step = 1),
+             numericInput("zone_4_target", "Urban Green target", 0.001, min = 0, max = 100, step = 1)
              )
            ),
     
