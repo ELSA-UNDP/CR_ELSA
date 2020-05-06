@@ -38,34 +38,67 @@ pu0 <- raster(here("data/", ELSA_df[ELSA_df$`Main Category` == "Planning units",
 pu <- pu0
 pu[is.na(HFP)] <- NA
 
-# HFP_zones <- raster(here("data/zones/", "hfp_uga.tif"))
+###################################
+# Zones
+###################################
 
-# HFP < 14 ~ 50% of country
-HFP_pro <- HFP < 12
-HFP_pro[HFP_pro < 1] <- NA
-HFP_pro_PA <- HFP_pro | PA
+urban <- raster(here("data/Zones/", "Urban Non-Urban.tif"))
+agri <- raster(here("data/Zones/", "Agriculture.tif"))
+fsci <- raster(here("data/Zones/", "fsci_cri.tif"))
+lzfm <- raster(here("data/Zones/", "Life Zones Forest and Mangrove.tif"))
+forest <- raster(here("data/Zones/", "Forest.tif"))
+mangrove <- raster(here("data/Zones/", "Mangroves.tif"))
+#Manage 
+# In agriculture-10% threshold
+Z_MG <- agri > 10
 
-HFP_res <- HFP >= 12 & HFP <= 20
-HFP_res[HFP_res < 1] <- NA
-HFP_res_PA <- HFP_res
-HFP_res_PA[HFP_pro_PA == 1] <- NA
+#Urban_Green
+# In Urban-10% theshold
+Z_UG <- urban == 1
+
+#Protect
+# Not in urban, not in agriculture-10% threshold, fsci >13
+Z_PR <- fsci > 13
+Z_PR[Z_MG] <- NA
+Z_PR[Z_UG] <- NA
+
+#Restore
+# Not in urban or agriculture, in life zone forest or mangrove, not mangrove, not forest, in fsci_cri =<13
+not_r <- sum(Z_UG, Z_MG, mangrove > 50, forest > 50, na.rm = T)
+yes_r <- sum(lzfm > 50, fsci <= 13, na.rm = T)
+Z_RE <- yes_r > 0
+Z_RE[not_r] <- NA
+
+#PA locked in
+Z_PR_PA <- Z_PR | PA
+Z_RE_PA <- Z_RE
+Z_MG_PA <- Z_MG
+Z_UG_PA <- Z_UG
+
+#PES locked in
+pes_pro <- raster(here("data/Zones/", "Payment for ES - Protection.tif"))
+pes_res <- raster(here("data/Zones/", "Payment for ES - Restore.tif"))
+pes_man <- raster(here("data/Zones/", "Payment for ES - Manage.tif"))
+
+Z_PR_ES <- Z_PR | pes_pro
+Z_RE_ES <- Z_RE | pes_res
+Z_MG_ES <- Z_MG | pes_man
+Z_UG_ES <- Z_UG
+
+#PA and ES locked in
+Z_PR_PE <- Z_PR | PA | pes_pro
+Z_RE_PE <- Z_RE | pes_res
+Z_MG_PE <- Z_MG | pes_man
+Z_UG_PE <- Z_UG
 
 
-HFP_mg <- HFP >= 12 & HFP <= 20
-HFP_mg[HFP_mg < 1] <- NA
-HFP_mg_PA <- HFP_mg
-HFP_mg_PA[HFP_pro_PA == 1] <- NA
+pu1 <- stack(Z_PR, Z_RE, Z_MG, Z_UG)
+pu1_pr <- stack(Z_PR_PA, Z_RE_PA, Z_MG_PA, Z_UG_PA)
+pu1_es <- stack(Z_PR_ES, Z_RE_ES, Z_MG_ES, Z_UG_ES)
+pu1_pe <- stack(Z_PR_PE, Z_RE_PE, Z_MG_PE, Z_UG_PE)
 
-
-HFP_BAU<-HFP >= 30
-HFP_BAU[HFP_BAU < 1] <- NA
-
-# pu1 <- stack(HFP_pro, HFP_res, HFP_mg, HFP_BAU)
-# names(pu1) <- c("Protect", "Restore", "Manage", "BAU")
-pu1 <- stack(HFP_pro, HFP_res, HFP_mg)
-pu1_pa <- stack(HFP_pro_PA, HFP_res_PA, HFP_mg_PA)
-
-names(pu1) <- names(pu1_pa) <- c("Protect", "Restore", "Manage")
+names(pu1) <- names(pu1_pr) <- 
+  names(pu1_es) <- names(pu1_pe) <- c("Protect", "Restore", "Manage", "Urban_Green")
 
 HFP_p <- HFP_r <- HFP_m <- HFP_b <- HFP
 HFP_p[] <- ifelse(HFP_pro[], HFP_p[], NA)
@@ -99,35 +132,34 @@ pu_all <- list(area = list(locked = pu1_pa,
 zone_1_impacts <- feat_df$Protect
 zone_2_impacts <- feat_df$Restore
 zone_3_impacts <- feat_df$Manage
-# zone_4_impacts <- c(0, 0, 0, 0, 0, 1, 0, 0, 0)
+zone_4_impacts <- feat_df$`Urban Green`
 
 # wgts <- matrix(1, ncol = 4, nrow = nlayers(feat_stack), dimnames = list(c(names(feat_stack)), c(names(pu1))))
 wgts <- data.frame(Name = feat_df$`Label-name`,
-                   Theme = feat_df$`Label-theme`,
-                   feature = names(feat_stack),
-                   weight = rep(as.double(1), nlayers(feat_stack)),
-                   # row.names = names(feat_stack),
-                   stringsAsFactors = FALSE)
+               Theme = feat_df$`Label-theme`,
+               feature = names(feat_stack),
+               weight = rep(as.double(1), nlayers(feat_stack)),
+               stringsAsFactors = FALSE)
 
-impacts <-data.frame(Name = feat_df$`Label-name`,
-                     Theme = feat_df$`Label-theme`,
-                     feature = names(feat_stack),
-                     Protect = zone_1_impacts, 
-                     Restore = zone_2_impacts, 
-                     Manage = zone_3_impacts
-                     # BAU = zone_4_impacts,
-                     # row.names = names(feat_stack))
-                     )
+impacts <- data.frame(Name = feat_df$`Label-name`,
+                  Theme = feat_df$`Label-theme`,
+                  feature = names(feat_stack),
+                  Protect = zone_1_impacts, 
+                  Restore = zone_2_impacts, 
+                  Manage = zone_3_impacts,
+                  Urban_Green = zone_4_impacts,
+                  stringsAsFactors = FALSE
+                  )
 
 
 #features
 zn1 <- feat_stack * impacts[,"Protect"]
 zn2 <- feat_stack * impacts[,"Restore"] 
 zn3 <- feat_stack * impacts[,"Manage"] 
-# zn4 <- feat_stack * impacts[,"BAU"] 
+zn4 <- feat_stack * impacts[,"Urban_Green"] 
 
 ### Create Zone file
-zns <- zones("Protect" = zn1, "Restore" = zn2,  "Manage" = zn3, #"BAU" = zn4,
+zns <- zones("Protect" = zn1, "Restore" = zn2,  "Manage" = zn3, "Urban_Green" = zn4,
              feature_names = names(zn1))
 
 # not used for now
