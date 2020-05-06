@@ -134,7 +134,23 @@ shinyServer(function(input, output, session) {
                    feature_names = names(zn1))
       
       # expand to different costs in the future
-      pu_temp <- pu_all[[input$cost]][[input$protected]]
+      if(input$protect == FALSE & input$pes == FALSE){
+        lock_flag <- 'avail'
+      } 
+      
+      if(input$protect == TRUE & input$pes == FALSE) {
+        lock_flag <- 'pa'
+      }
+      
+      if(input$protect == FALSE & input$pes == TRUE) {
+        lock_flag <- 'es'
+      }
+      
+      if(input$protect == TRUE & input$pes == TRUE) {
+        lock_flag <- 'pe'
+      }
+
+      pu_temp <- pu_all[[input$cost]][[lock_flag]]
         
       prob.ta <- problem(pu_temp, zns) %>%
         add_max_utility_objective(c(count_tar(pu0, input$zone_1_target), 
