@@ -174,7 +174,7 @@ shinyServer(function(input, output, session) {
       
       if(input$protect == TRUE & input$pes == TRUE) {
         prob.ta <- prob.ta %>%
-          add_locked_in_constraints(stack(PA | pes_pro, pes_res, pes_man, PA0))
+          add_locked_in_constraints(stack(pa_pes_pro, pa_pes_res, pa_pes_man, PA0))
       }
       
       

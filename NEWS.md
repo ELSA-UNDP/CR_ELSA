@@ -1,5 +1,6 @@
 # ELSA Shiny v0.9
 
+- PA and PES lock in options
 - Urban Green zone for CR
 
 # ELSA Shiny v0.8

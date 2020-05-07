@@ -25,10 +25,10 @@ feat_stack_sc <- feat_stack / cellStats(feat_stack, max)
                                                          
 
 #Possible cost layer:
-HFP <- raster(here("data/zones/", ELSA_df[ELSA_df$`Main Category` == "Human Footprint","CR_data"]))
+HFP <- raster(here("data/Zones/", ELSA_df[ELSA_df$`Main Category` == "Human Footprint","CR_data"]))
 
 #Protected areas
-PA <- raster(here("data/zones/", ELSA_df[ELSA_df$`Main Category` == "Protected Natural Areas", "CR_data"][1,]))
+PA <- raster(here("data/Zones/", ELSA_df[ELSA_df$`Main Category` == "Protected Natural Areas", "CR_data"][1,]))
 PA <- PA > 50
 PA0 <- PA
 PA0[] <- NA
@@ -87,6 +87,10 @@ pes_pro <- raster(here("data/Zones/", "Payment for ES - Protection.tif")) > 10
 pes_res <- raster(here("data/Zones/", "Payment for ES - Restore.tif")) > 10
 pes_man <- raster(here("data/Zones/", "Payment for ES - Manage.tif")) > 10
 
+#Protect trumps Restore trumps Manage
+pes_res[pes_pro] <- NA
+pes_man[pes_pro | pes_res] <- NA
+
 Z_PR_ES <- Z_PR | pes_pro
 Z_RE_ES <- Z_RE | pes_res
 Z_MG_ES <- Z_MG | pes_man
@@ -98,7 +102,12 @@ Z_RE_PE <- Z_RE | pes_res
 Z_MG_PE <- Z_MG | pes_man
 Z_UG_PE <- Z_UG
 
-#TODO make sure overlap in PA and ES is taken care of
+#Protect trumps Restore trumps Manage
+pa_pes_pro <- PA | pes_pro
+pa_pes_res <- pes_res
+pa_pes_res[pa_pes_pro] <- NA
+pa_pes_man <- pes_man
+pa_pes_man[pa_pes_pro | pa_pes_res] <- NA
 
 
 pu1 <- stack(Z_PR, Z_RE, Z_MG, Z_UG)

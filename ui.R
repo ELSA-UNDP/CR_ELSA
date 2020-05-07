@@ -30,14 +30,17 @@ body <- dashboardBody(tags$head(tags$style(HTML('
                            )),
              
              tags$b("Do you want to lock in the following features?"),
+             helpText(HTML("Minimum targets PA locked in: protect (26%)")),
+             helpText(HTML("Minimum targets PES locked in: protect (19%), restore (3%), manage (1%)")),
+             helpText(HTML("Minimum targets PA + PES locked in: protect (40%), restore (3%), manage (1%)")),
              checkboxInput("protect", "Protected Areas", FALSE),
              checkboxInput("pes", "Payment for Ecosystem Services", FALSE),
              tags$hr(),
              helpText(HTML("Given the current problem formulations values need to be set >= 0.001.")),
-             numericInput("zone_1_target", "Protect target", 20, min = 0, max = 100, step = 1),
-             numericInput("zone_2_target", "Restore target", 0.001, min = 0, max = 100, step = 1),
-             numericInput("zone_3_target", "Manage target", 0.001, min = 0, max = 100, step = 1),
-             numericInput("zone_4_target", "Urban Green target", 0.001, min = 0, max = 100, step = 1)
+             numericInput("zone_1_target", "Protect target", 20, min = 0, max = 100, step = 0.1),
+             numericInput("zone_2_target", "Restore target", 0.001, min = 0, max = 100, step = 0.1),
+             numericInput("zone_3_target", "Manage target", 0.001, min = 0, max = 100, step = 0.1),
+             numericInput("zone_4_target", "Urban Green target", 0.001, min = 0, max = 100, step = 0.1)
              )
            ),
     
