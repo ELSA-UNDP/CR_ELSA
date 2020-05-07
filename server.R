@@ -177,6 +177,11 @@ shinyServer(function(input, output, session) {
           add_locked_in_constraints(stack(pa_pes_pro, pa_pes_res, pa_pes_man, PA0))
       }
       
+      #Boundary penalty factor
+      if(input$blm > 0){
+        prob.ta <- prob.ta %>%
+          add_boundary_penalties(penalty = input$blm)
+      }
       
       progress$set(message = 'Calculation in progress', detail = 'running prioritization 1/4', 
                    value = 0.2)

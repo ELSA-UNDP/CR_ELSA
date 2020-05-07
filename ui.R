@@ -40,7 +40,9 @@ body <- dashboardBody(tags$head(tags$style(HTML('
              numericInput("zone_1_target", "Protect target", 20, min = 0, max = 100, step = 0.1),
              numericInput("zone_2_target", "Restore target", 0.001, min = 0, max = 100, step = 0.1),
              numericInput("zone_3_target", "Manage target", 0.001, min = 0, max = 100, step = 0.1),
-             numericInput("zone_4_target", "Urban Green target", 0.001, min = 0, max = 100, step = 0.1)
+             numericInput("zone_4_target", "Urban Green target", 0.001, min = 0, max = 100, step = 0.1),
+             tags$hr(),
+             numericInput("blm", "Boundary penalty factor", 0, min = 0, max = 1000000, step = 0.1)
              )
            ),
     

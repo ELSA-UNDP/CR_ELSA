@@ -5,9 +5,9 @@ weights.temp$weight <- 1
 
 input <- list()
 input$zone_1_target <- 20
-input$zone_2_target <- 0.001
-input$zone_3_target <- 0.001
-input$zone_4_target <- 0.001
+input$zone_2_target <- 10
+input$zone_3_target <- 10
+input$zone_4_target <- 10
 
 #features
 zn1 <- feat_stack * impacts.temp[,"Protect"]
