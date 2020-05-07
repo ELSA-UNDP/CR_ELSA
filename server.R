@@ -161,12 +161,22 @@ shinyServer(function(input, output, session) {
                                     # count_tar(pu0,zone_4_target))) %>%
         add_gurobi_solver(gap = 0) 
       
-#TODO
-      if(input$protected == "locked"){
+
+      if(input$protect == TRUE & input$pes == FALSE) {
         prob.ta <- prob.ta %>%
-          add_locked_in_constraints(stack(PA, PA0, PA0))
-        # add_locked_in_constraints(stack(PA, PA0, PA0, PA0))
+          add_locked_in_constraints(stack(PA, PA0, PA0, PA0))
       }
+      
+      if(input$protect == FALSE & input$pes == TRUE) {
+        prob.ta <- prob.ta %>%
+          add_locked_in_constraints(stack(pes_pro, pes_res, pes_man, PA0))
+      }
+      
+      if(input$protect == TRUE & input$pes == TRUE) {
+        prob.ta <- prob.ta %>%
+          add_locked_in_constraints(stack(PA | pes_pro, pes_res, pes_man, PA0))
+      }
+      
       
       progress$set(message = 'Calculation in progress', detail = 'running prioritization 1/4', 
                    value = 0.2)
@@ -374,10 +384,10 @@ shinyServer(function(input, output, session) {
       rst.UNFCCC[rst.UNFCCC == 0] <- NA
       rst.SDG[rst.SDG == 0] <- NA
       
-      # cols <- c('#4daf4a', '#984ea3', '#377eb8', '#e41a1c')
-      cols <- c('#4daf4a', '#984ea3', '#377eb8')
+      cols <- c('#4daf4a', '#984ea3', '#377eb8', '#e41a1c')
+      # cols <- c('#4daf4a', '#984ea3', '#377eb8')
       
-      pal.prior <- colorNumeric(c('#4daf4a', '#984ea3', '#377eb8'), c(1, 2, 3),
+      pal.prior <- colorNumeric(c('#4daf4a', '#984ea3', '#377eb8', '#e41a1c'), c(1, 2, 3, 4),
                                 na.color = "transparent") 
       
       pal.cbd <-  colorNumeric(c('#edf8fb','#b2e2e2','#66c2a4','#2ca25f','#006d2c'), c(0, 0.2, 0.4, 0.6, 0.8, 1),
@@ -399,13 +409,13 @@ shinyServer(function(input, output, session) {
       
       #prioritization results
       outl <- outl %>% 
-        addRasterImage(category_layer(rst), colors = pal.prior, opacity = 0.9, 
+        addRasterImage(category_layer_light(rst), colors = pal.prior, opacity = 0.9, 
                        maxBytes = 8 * 1024 * 1024, group = "All_action", project = FALSE) %>% 
-        addRasterImage(category_layer(rst.CBD), colors = pal.prior, opacity = 0.9, 
+        addRasterImage(category_layer_light(rst.CBD), colors = pal.prior, opacity = 0.9, 
                        maxBytes = 8 * 1024 * 1024, group = "CBD_action", project = FALSE) %>% 
-        addRasterImage(category_layer(rst.UNFCCC), colors = pal.prior, opacity = 0.9, 
+        addRasterImage(category_layer_light(rst.UNFCCC), colors = pal.prior, opacity = 0.9, 
                        maxBytes = 8 * 1024 * 1024, group = "UNFCCC_action", project = FALSE) %>% 
-        addRasterImage(category_layer(rst.SDG), colors = pal.prior, opacity = 0.9, 
+        addRasterImage(category_layer_light(rst.SDG), colors = pal.prior, opacity = 0.9, 
                        maxBytes = 8 * 1024 * 1024, group = "SDG_action", project = FALSE)
       
       

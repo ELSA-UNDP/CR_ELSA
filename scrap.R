@@ -4,34 +4,38 @@ weights.temp$weight <- 1
 
 
 input <- list()
-input$zone_1_target <- 35
-input$zone_2_target <- 10
-input$zone_3_target <- 20
+input$zone_1_target <- 20
+input$zone_2_target <- 0.001
+input$zone_3_target <- 0.001
+input$zone_4_target <- 0.001
 
+#features
 zn1 <- feat_stack * impacts.temp[,"Protect"]
 zn2 <- feat_stack * impacts.temp[,"Restore"] 
 zn3 <- feat_stack * impacts.temp[,"Manage"] 
-# zn4 <- feat_stack * impacts.temp[,"BAU"] 
+zn4 <- feat_stack * impacts.temp[,"Urban_Green"] 
 
 ### Create Zone file
-zns <- zones("Protect" = zn1, "Restore" = zn2,  "Manage" = zn3, #"BAU" = zn4,
+zns <- zones("Protect" = zn1, "Restore" = zn2,  "Manage" = zn3, "Urban_Green" = zn4,
              feature_names = names(zn1))
 
 # expand to different costs in the future
-pu_temp <- pu_all[["area"]][["locked"]]
+pu_temp <- pu_all[["area"]][["avail"]]
 
 
 prob.ta <- problem(pu_temp, zns) %>%
   add_max_utility_objective(c(count_tar(pu0, input$zone_1_target), 
                               count_tar(pu0,input$zone_2_target), 
-                              count_tar(pu0,input$zone_3_target))) %>%
+                              count_tar(pu0,input$zone_3_target),
+                              count_tar(pu0,input$zone_4_target))) %>%
   
   # count_tar(pu0,zone_4_target))) %>%
   add_gurobi_solver(gap = 0) 
 
 
-  prob.ta <- prob.ta %>%
-    add_locked_in_constraints(stack(PA, PA0, PA0))
+# 
+#   prob.ta <- prob.ta %>%
+#     add_locked_in_constraints(stack(PA, PA0, PA0))
 
   
 # progress$set(message = 'Calculation in progress', detail = 'running prioritization', 
@@ -39,7 +43,7 @@ prob.ta <- problem(pu_temp, zns) %>%
 
 #all groups
 prob.all <- prob.ta %>%
-  add_feature_weights(as.matrix(matrix(rep(weights.temp$weight, 3), ncol = 3, nrow = nlayers(feat_stack))))
+  add_feature_weights(as.matrix(matrix(rep(weights.temp$weight, 4), ncol = 4, nrow = nlayers(feat_stack))))
 result <- prioritizr::solve(prob.all, force = TRUE)
 
 feat_rep <- feature_representation(prob.all, result)

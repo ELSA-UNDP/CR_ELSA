@@ -19,6 +19,8 @@ feat_df <- ELSA_df[!is.na(ELSA_df$Protect), ] %>%
   arrange(`Label-theme`, `Label-name`)
 
 feat_stack <- stack(here("data/Features/", feat_df$feat_name))
+#to avoid values <0
+feat_stack$Forest_Water_Yield[feat_stack$Forest_Water_Yield < 0] <- NA
 feat_stack_sc <- feat_stack / cellStats(feat_stack, max)
                                                          
 
@@ -42,32 +44,37 @@ pu[is.na(HFP)] <- NA
 # Zones
 ###################################
 
-urban <- raster(here("data/Zones/", "Urban Non-Urban.tif"))
-agri <- raster(here("data/Zones/", "Agriculture.tif"))
+urban <- raster(here("data/Zones/", "Urban Non-Urban.tif")) > 0.1
+agri <- raster(here("data/Zones/", "Agriculture.tif")) > 10
 fsci <- raster(here("data/Zones/", "fsci_cri.tif"))
-lzfm <- raster(here("data/Zones/", "Life Zones Forest and Mangrove.tif"))
-forest <- raster(here("data/Zones/", "Forest.tif"))
-mangrove <- raster(here("data/Zones/", "Mangroves.tif"))
+lzfm <- raster(here("data/Zones/", "Life Zones Forest and Mangrove.tif")) > 50
+forest <- raster(here("data/Zones/", "Forest.tif")) > 50
+mangrove <- raster(here("data/Zones/", "Mangroves.tif")) > 50
+
 #Manage 
 # In agriculture-10% threshold
-Z_MG <- agri > 10
+Z_MG <- agri
+Z_MG[Z_MG == 0] <- NA
 
 #Urban_Green
 # In Urban-10% theshold
-Z_UG <- urban == 1
+Z_UG <- urban
+Z_UG[Z_UG == 0] <- NA
 
 #Protect
 # Not in urban, not in agriculture-10% threshold, fsci >13
 Z_PR <- fsci > 13
 Z_PR[Z_MG] <- NA
 Z_PR[Z_UG] <- NA
+Z_PR[Z_PR == 0] <- NA
 
 #Restore
 # Not in urban or agriculture, in life zone forest or mangrove, not mangrove, not forest, in fsci_cri =<13
-not_r <- sum(Z_UG, Z_MG, mangrove > 50, forest > 50, na.rm = T)
-yes_r <- sum(lzfm > 50, fsci <= 13, na.rm = T)
+not_r <- sum(Z_UG, Z_MG, mangrove, forest, na.rm = T)
+yes_r <- sum(lzfm, fsci <= 13, na.rm = T)
 Z_RE <- yes_r > 0
 Z_RE[not_r] <- NA
+Z_RE[Z_RE == 0] <- NA
 
 #PA locked in
 Z_PR_PA <- Z_PR | PA
@@ -76,9 +83,9 @@ Z_MG_PA <- Z_MG
 Z_UG_PA <- Z_UG
 
 #PES locked in
-pes_pro <- raster(here("data/Zones/", "Payment for ES - Protection.tif"))
-pes_res <- raster(here("data/Zones/", "Payment for ES - Restore.tif"))
-pes_man <- raster(here("data/Zones/", "Payment for ES - Manage.tif"))
+pes_pro <- raster(here("data/Zones/", "Payment for ES - Protection.tif")) > 10
+pes_res <- raster(here("data/Zones/", "Payment for ES - Restore.tif")) > 10
+pes_man <- raster(here("data/Zones/", "Payment for ES - Manage.tif")) > 10
 
 Z_PR_ES <- Z_PR | pes_pro
 Z_RE_ES <- Z_RE | pes_res
@@ -90,6 +97,8 @@ Z_PR_PE <- Z_PR | PA | pes_pro
 Z_RE_PE <- Z_RE | pes_res
 Z_MG_PE <- Z_MG | pes_man
 Z_UG_PE <- Z_UG
+
+#TODO make sure overlap in PA and ES is taken care of
 
 
 pu1 <- stack(Z_PR, Z_RE, Z_MG, Z_UG)
