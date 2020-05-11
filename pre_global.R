@@ -71,9 +71,9 @@ Z_PR[Z_PR == 0] <- NA
 
 #Restore
 # Not in urban or agriculture, in life zone forest or mangrove, not mangrove, not forest, in fsci_cri =<13
-not_r <- sum(urban > 30, agri > 30, mangrove, forest, na.rm = T)
+not_r <- sum(urban > 30, agri > 50, mangrove, forest, na.rm = T)
 yes_r <- sum(lzfm, fsci <= 13, na.rm = T)
-Z_RE <- yes_r > 0
+Z_RE <- yes_r == 2
 Z_RE[not_r] <- NA
 Z_RE[Z_RE == 0] <- NA
 
