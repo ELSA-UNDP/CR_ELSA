@@ -44,8 +44,8 @@ pu[is.na(HFP)] <- NA
 # Zones
 ###################################
 
-urban <- raster(here("data/Zones/", "Urban Non-Urban.tif")) > 0.1
-agri <- raster(here("data/Zones/", "Agriculture.tif")) > 10
+urban <- raster(here("data/Zones/", "Urban Non-Urban.tif")) 
+agri <- raster(here("data/Zones/", "Agriculture.tif")) 
 fsci <- raster(here("data/Zones/", "fsci_cri.tif"))
 lzfm <- raster(here("data/Zones/", "Life Zones Forest and Mangrove.tif")) > 50
 forest <- raster(here("data/Zones/", "Forest.tif")) > 50
@@ -53,24 +53,25 @@ mangrove <- raster(here("data/Zones/", "Mangroves.tif")) > 50
 
 #Manage 
 # In agriculture-10% threshold
-Z_MG <- agri
+Z_MG <- agri > 10 
+Z_MG[urban > 30] <- NA
 Z_MG[Z_MG == 0] <- NA
 
 #Urban_Green
 # In Urban-10% theshold
-Z_UG <- urban
+Z_UG <- urban > 10
 Z_UG[Z_UG == 0] <- NA
 
 #Protect
 # Not in urban, not in agriculture-10% threshold, fsci >13
 Z_PR <- fsci > 13
-Z_PR[Z_MG] <- NA
-Z_PR[Z_UG] <- NA
+Z_PR[urban > 30] <- NA
+Z_PR[agri > 30] <- NA
 Z_PR[Z_PR == 0] <- NA
 
 #Restore
 # Not in urban or agriculture, in life zone forest or mangrove, not mangrove, not forest, in fsci_cri =<13
-not_r <- sum(Z_UG, Z_MG, mangrove, forest, na.rm = T)
+not_r <- sum(urban > 30, agri > 30, mangrove, forest, na.rm = T)
 yes_r <- sum(lzfm, fsci <= 13, na.rm = T)
 Z_RE <- yes_r > 0
 Z_RE[not_r] <- NA

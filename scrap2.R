@@ -31,11 +31,13 @@ p2 <- prob.all %>% add_boundary_penalties(1)
 system.time(r2 <- prioritizr::solve(p2, force = TRUE))
 plot(category_layer_light(r2))
 
+pu_temp <- pu_all[["area"]][["avail"]]
 
-outl <- outl %>% 
-  addRasterImage(category_layer_light(pu_temp), colors = pal.prior, opacity = 0.9, 
-                 maxBytes = 8 * 1024 * 1024, group = "All_action", project = FALSE) 
 
+# outl <- outl %>% 
+#   addRasterImage(category_layer_light(pu_temp), colors = pal.prior, opacity = 0.9, 
+#                  maxBytes = 8 * 1024 * 1024, group = "All_action", project = FALSE) 
+# 
 
 
 pal.prior <- colorNumeric(c('#4daf4a', '#984ea3', '#377eb8', '#e41a1c'), c(1, 2, 3, 4),
