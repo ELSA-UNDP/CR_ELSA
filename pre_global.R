@@ -199,3 +199,4 @@ SDG <- SDG / sapply(as.data.frame(SDG), function(x) max(x, na.rm = TRUE) )
 
 save.image(here("pre_global.RData"))
 
+quit()
