@@ -473,7 +473,7 @@ shinyServer(function(input, output, session) {
   output$summary <- DT::renderDataTable(my.data()$feat_rep_tabl,
                                     options = list(dom = 'tipr',
                                                    autoWidth = TRUE,
-                                                   pageLength = 9)
+                                                   pageLength = nrow(my.data()$feat_rep_tabl))
                                     )
 
   output$downloadSHP <- downloadHandler(
