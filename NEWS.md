@@ -1,3 +1,7 @@
+# ELSA Shiny v2.0
+
+- Layer update for CR
+
 # ELSA Shiny v0.9
 
 - PA and PES lock in options
