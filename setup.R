@@ -22,6 +22,7 @@ list.of.packages <- c("shiny",
                       "tidyverse",
                       "prioritizr",
                       "here",
+                      "purrr",
                       "readxl")
 
 
@@ -37,8 +38,8 @@ if(!require(shinyIncubator)){
   devtools::install_github("rstudio/shiny-incubator")
 }
 
-if(!require(gurobi)){
-  install.packages("C:/gurobi902/win64/R/gurobi_9.0-2.zip", repos = NULL, type = "win.binary")
-}
+# if(!require(gurobi)){
+#   install.packages("C:/gurobi902/win64/R/gurobi_9.0-2.zip", repos = NULL, type = "win.binary")
+# }
 
 source("pre_global.R")

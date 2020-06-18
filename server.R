@@ -153,13 +153,20 @@ shinyServer(function(input, output, session) {
       pu_temp <- pu_all[[input$cost]][[lock_flag]]
         
       prob.ta <- problem(pu_temp, zns) %>%
-        add_max_utility_objective(c(count_tar(pu0, input$zone_1_target), 
-                                    count_tar(pu0,input$zone_2_target), 
+        # add_min_shortfall_objective(c(count_tar(pu0, input$zone_1_target),
+        #                               count_tar(pu0,input$zone_2_target),
+        #                               count_tar(pu0,input$zone_3_target),
+        #                               count_tar(pu0,input$zone_4_target))) %>%
+
+        add_max_utility_objective(c(count_tar(pu0, input$zone_1_target),
+                                    count_tar(pu0,input$zone_2_target),
                                     count_tar(pu0,input$zone_3_target),
                                     count_tar(pu0,input$zone_4_target))) %>%
         
                                     # count_tar(pu0,zone_4_target))) %>%
-        add_gurobi_solver(gap = 0) 
+        
+        add_default_solver(gap = 0)
+        # add_gurobi_solver(gap = 0) 
       
 
       if(input$protect == TRUE & input$pes == FALSE) {
@@ -188,7 +195,11 @@ shinyServer(function(input, output, session) {
       
       #all groups
       prob.all <- prob.ta %>%
+        # add_relative_targets(
+        #   as.matrix(matrix(rep(ifelse(weights.temp$weight > 0, 1, 0), 4), 
+        #                    ncol = 4, nrow = nlayers(feat_stack)))) %>%
         add_feature_weights(as.matrix(matrix(rep(weights.temp$weight, 4), ncol = 4, nrow = nlayers(feat_stack))))
+      
       result <- prioritizr::solve(prob.all, force = TRUE)
       
       feat_rep <- feature_representation(prob.all, result)
@@ -206,6 +217,10 @@ shinyServer(function(input, output, session) {
       wt.CBD <- weights.temp
       wt.CBD$weight[names(feat_stack) %notin% CBD_names] <- 0
       prob.CBD <- prob.ta %>%
+        # add_relative_targets(
+        #   as.matrix(matrix(rep(ifelse(wt.CBD$weight > 0, 1, 0), 4), 
+        #                  ncol = 4, nrow = nlayers(feat_stack)))) %>%
+        
         add_feature_weights(as.matrix(matrix(rep(wt.CBD$weight, 4), ncol = 4, nrow = nlayers(feat_stack))))
       res.CBD <- prioritizr::solve(prob.CBD, force = TRUE)
       
@@ -219,6 +234,10 @@ shinyServer(function(input, output, session) {
       wt.UNFCCC <- weights.temp
       wt.UNFCCC$weight[names(feat_stack) %notin% UNFCCC_names] <- 0
       prob.UNFCCC <- prob.ta %>%
+        # add_relative_targets(
+        #   as.matrix(matrix(rep(ifelse(wt.UNFCCC$weight > 0, 1, 0), 4), 
+        #                    ncol = 4, nrow = nlayers(feat_stack)))) %>%
+        
         add_feature_weights(as.matrix(matrix(rep(wt.UNFCCC$weight, 4), ncol = 4, nrow = nlayers(feat_stack))))
       res.UNFCCC <- prioritizr::solve(prob.UNFCCC, force = TRUE)
       
@@ -232,6 +251,10 @@ shinyServer(function(input, output, session) {
       wt.SDG <- weights.temp
       wt.SDG$weight[names(feat_stack) %notin% SDG_names] <- 0
       prob.SDG <- prob.ta %>%
+        # add_relative_targets(
+        #   as.matrix(matrix(rep(ifelse(wt.SDG$weight > 0, 1, 0), 4), 
+        #                    ncol = 4, nrow = nlayers(feat_stack)))) %>%
+        
         add_feature_weights(as.matrix(matrix(rep(wt.SDG$weight, 4), ncol = 4, nrow = nlayers(feat_stack))))
       res.SDG <- prioritizr::solve(prob.SDG, force = TRUE)
       
@@ -278,6 +301,10 @@ shinyServer(function(input, output, session) {
   
   observe ({  my.data()
   })
+  
+  output$InMap <- renderLeaflet({
+    leaflet_input
+  }) 
   
   output$cadMap <- renderLeaflet({
     if(input$mrun == 0) {

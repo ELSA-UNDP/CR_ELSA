@@ -1,3 +1,7 @@
+# ELSA Shiny v2.1
+
+- Input layer map
+
 # ELSA Shiny v2.0
 
 - Layer update for CR

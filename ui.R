@@ -57,6 +57,7 @@ body <- dashboardBody(tags$head(tags$style(HTML('
              tabPanel("Edit impacts", id = "rhimpacts", 
                       helpText("Information about impacts to go here"), 
                       rHandsontableOutput("hot_imp")),
+             tabPanel("Input Layers",leafletOutput("InMap",height=700)),
              tabPanel("Results + Download",
                       helpText(HTML("<h4>Result Summary Table</h4>")),
                       helpText(HTML("Placeholder for result summary table text. Numeric values are in percent.")),

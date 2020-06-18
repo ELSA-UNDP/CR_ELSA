@@ -9,6 +9,8 @@ input$zone_2_target <- 10
 input$zone_3_target <- 10
 input$zone_4_target <- 10
 
+input$cost <- "area"
+
 #features
 zn1 <- feat_stack * impacts.temp[,"Protect"]
 zn2 <- feat_stack * impacts.temp[,"Restore"] 

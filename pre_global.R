@@ -1,16 +1,9 @@
-library(tidyverse)
-library(prioritizr)
-library(rgdal)
-library(here)
-library(doParallel)
-library(readxl)
-# library(rdrop2)
+# This file sets up the input data and tool.
+# All the parts in there just need to be run once, which is why they are in this file.
 
-#get country specific target value
-count_tar <- function(PU = NULL, target = NULL){
-  round(cellStats(PU,"sum") / 100 * target, 0)
-}
+purrr::walk(list.files("R", full.names = TRUE), source)
 
+# load spreadsheet that has the information for layers and imapcts
 ELSA_df <- read_xlsx(here("Costa Rica v2 Data.xlsx"), "Sheet1")
 
 
@@ -21,7 +14,7 @@ feat_df <- ELSA_df[!is.na(ELSA_df$Protect), ] %>%
 feat_stack <- stack(here("data/Features/", feat_df$feat_name))
 #to avoid values <0
 feat_stack$Forest_Water_Yield[feat_stack$Forest_Water_Yield < 0] <- NA
-feat_stack_sc <- feat_stack / cellStats(feat_stack, max)
+feat_stack_sc <- feat_stack / cellStats(feat_stack, max) 
                                                          
 
 #Possible cost layer:
@@ -39,6 +32,9 @@ PA0[] <- NA
 pu0 <- raster(here("data/", ELSA_df[ELSA_df$`Main Category` == "Planning units","CR_data"]))
 pu <- pu0
 pu[is.na(HFP)] <- NA
+
+
+leaflet_input <- fun_leaflet_input(feat_stack_sc %>% mask(pu0))
 
 ###################################
 # Zones
@@ -198,5 +194,3 @@ SDG <- SDG / sapply(as.data.frame(SDG), function(x) max(x, na.rm = TRUE) )
 
 
 save.image(here("pre_global.RData"))
-
-quit()
