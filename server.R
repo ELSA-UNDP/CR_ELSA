@@ -3,7 +3,6 @@
 ## Shiny App for Costa Rica max_utility using prioritzr 
 ##
 ## Author: Richard Schuster (richard.schuster@glel.carleton.ca)
-## 29 January 2020
 ##
 ##################################################################
 ##################################################################

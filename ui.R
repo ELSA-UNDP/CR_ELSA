@@ -1,7 +1,7 @@
 
 
 header <- dashboardHeader(
-  title = "I AM ELSA Costa Rica v2",
+  title = "I AM ELSA Costa Rica v2.1",
   titleWidth = 450
 )
 
